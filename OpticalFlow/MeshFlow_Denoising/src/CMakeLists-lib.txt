@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 2.8.4)
+
+aux_source_directory(. SRC_MODULE_LIST)
+# file(GLOB_RECURSE SRCS LIST_DIRECTORIES false RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+add_library(SRC_MODULE_dynamic SHARED ${SRC_MODULE_LIST})
+add_library(SRC_MODULE_static STATIC ${SRC_MODULE_LIST})
+TARGET_LINK_LIBRARIES(SRC_MODULE_dynamic ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES(SRC_MODULE_static ${OpenCV_LIBS})
+
+set_target_properties(SRC_MODULE_dynamic PROPERTIES OUTPUT_NAME "SRC_MODULE")
+set_target_properties(SRC_MODULE_static PROPERTIES OUTPUT_NAME "SRC_MODULE")
