@@ -11,7 +11,8 @@ from MeshFlow import generate_vertex_profiles
 
 # block of size in mesh
 PIXELS = 16
-
+global framesNUM
+framesNUM = 50
 # motion propogation radius
 RADIUS = 300
 
@@ -51,7 +52,7 @@ def read_video(cap):
     ret, old_frame = cap.read()
     old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    frame_count = 100
+    frame_count = framesNUM
 
     # preserve aspect ratio
     global HORIZONTAL_BORDER
@@ -197,7 +198,7 @@ def generate_stabilized_video(cap, x_motion_meshes, y_motion_meshes, new_x_motio
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    frame_count = 100
+    frame_count = framesNUM
     # generate stabilized video
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter('../stable.avi', fourcc, frame_rate, (2*frame_width, frame_height))
@@ -249,8 +250,15 @@ if __name__ == '__main__':
     
     start_time = time.time()
     # get video properties
+    if len(sys.argv) < 2:
+        print("Usage: python3 %s <srcVideo> [nframes=10]"%sys.argv[0])
+        sys.exit(0)
+    
     file_name = sys.argv[1]
-    cap = cv2.VideoCapture(file_name)
+    framesNUM = 10
+    if len(sys.argv) > 2:
+        framesNUM = int(sys.argv[2])
+    cap = cv2.VideoCapture(file_name)    
     
     # propogate motion vectors and generate vertex profiles
     x_motion_meshes, y_motion_meshes, x_paths, y_paths = read_video(cap)
