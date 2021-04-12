@@ -159,9 +159,10 @@ int CPM::Matching(FImage& img1, FImage& img2, FImage& outMatches)
     {
         outMatches.allocate(4, validMatchCnt, 1);
     }
+    int cnt = 0;
     for (int i = 0; i < numV; i++)
     {
-        if (validFlag[i])
+        if (! validFlag[i])
             continue;
 
         int idx = 2 * i;
@@ -169,11 +170,12 @@ int CPM::Matching(FImage& img1, FImage& img2, FImage& outMatches)
         int y = _seeds[idx + 1];
         float u = seedsFlow[idx];
         float v = seedsFlow[idx + 1];
-        int oidx = 4 * i;
+        int oidx = 4 * cnt;
         outMatches[oidx + 0] = x;
         outMatches[oidx + 1] = y;
         outMatches[oidx + 2] = x + u;  // x2, y2
         outMatches[oidx + 3] = y + v;
+        cnt++;
     }
     delete[] validFlag;
 
@@ -682,4 +684,34 @@ float CPM::MinimalCircle(float* x, float* y, int n, float* centerX, float* cente
         *centerY = o.y;
     }
     return r;
+}
+
+// draw each match as a 3x3 color block
+void Match2Flow(const FImage& inMat, int flowH, int flowW, cv::Mat& flowX, FImage& flowY)
+{
+    flowX = cv::Mat::zeros(flowH, flowW, CV_32FC1);
+    flowY = cv::Mat::zeros(flowH, flowW, CV_32FC1);
+
+    int cnt = inMat.height();
+    float* pfX = (float*)flowX.data;
+    float* pfY = (float*)flowY.data;
+    for (int i = 0; i < cnt; i++)
+    {
+        float* p = inMat.rowPtr(i);
+        float x = p[0];
+        float y = p[1];
+        float u = p[2] - x;
+        float v = p[3] - y;
+        for (int di = -1; di <= 1; di++)
+        {
+            for (int dj = -1; dj <= 1; dj++)
+            {
+                int tx = ImageProcessing::EnforceRange(x + dj, flowW);
+                int ty = ImageProcessing::EnforceRange(y + di, flowH);
+                int idx = ty*flowW + tx;
+                pfX[idx] = u;
+                pfY[idx] = v;
+            }
+        }
+    }
 }

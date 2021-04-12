@@ -98,4 +98,6 @@ private:
     IntImage _neighbors2;
 };
 
+void Match2Flow(const FImage& inMat, int flowH, int flowW, cv::Mat& flowX, FImage& flowY);
+
 #endif // _CPM_H_
